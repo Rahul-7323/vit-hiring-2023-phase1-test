@@ -1,9 +1,10 @@
 import requests
 from data import SLOTS, FACULTIES, COURSES, REGISTER_COURSES
+import json
 
 API_BASE = 'http://localhost:3000'
-STUDENT_AUTH_TOKEN = 'ENTER STUDENT AUTH TOKEN HERE'
-ADMIN_AUTH_TOKEN = 'ENTER ADMIN AUTH TOKEN HERE'
+ADMIN_AUTH_TOKEN = 'Bearer TOKEN'
+STUDENT_AUTH_TOKEN = 'Bearer TOKEN'
 
 url = lambda path: API_BASE + path
 
@@ -12,6 +13,10 @@ def make_request(path, body=None, access_scope='student', request_type='POST'):
         headers = {
             'Authorization': '',
         }
+
+        if request_type == 'POST':
+            headers['Content-Type'] = 'application/json'
+
         if access_scope == 'student':
             headers['Authorization'] = STUDENT_AUTH_TOKEN
         elif access_scope == 'admin':
@@ -26,7 +31,8 @@ def make_request(path, body=None, access_scope='student', request_type='POST'):
             raise NotImplementedError('Request type was not implemented.')
 
         print(path, body)
-        r = request_function(url(path), body, headers=headers)
+        body_json = json.dumps(body)
+        r = request_function(url(path), body_json, headers=headers)
         response_data = r.json()
         return [r.status_code, response_data]
     except Exception as e:
